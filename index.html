@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Filter Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="row">
+      <div class="col-6 text-center m-auto pt-4">
+        <h1 class="mb-3">Filter Data By Zone</h1>
+        <form>
+          <div class="form-group border p-5 rounded mb-3">
+            <input type="file" class="form-control-file" id="csvFile" accept=".json" required>
+          </div>
+          <button type="button" class="btn btn-primary w-100 fw-bold" id="btn-submit">Submit</button>
+        </form>
+      </div>
+      <footer class="bg-primary mt-5">
+        <div class="row text-center text-light">
+          <div class="col-12 py-4">
+            <h4 class="fw-bold">Tentang Saya</h4>
+            <div class="fluid-container mt-4 mb-2">
+              <a
+                class="d-block link-light text-decoration-none"
+                target="_blank"
+                href="https://www.instagram.com/fachrigobel/"
+                >Instagram: @fachrigobel</a
+              >
+              <a
+                class="d-block link-light text-decoration-none"
+                target="_blank"
+                href="https://wa.me/6282188191052"
+                >Whatsapp: +62 821 8819 1052</a
+              >
+              <a
+                class="d-block link-light text-decoration-none"
+                target="_blank"
+                href="https://www.google.com/maps/place/Kotamobagu,+Kota+Kotamobagu,+Sulawesi+Utara/@0.7350465,124.2819703,13z/data=!3m1!4b1!4m5!3m4!1s0x327e3d423103edd7:0x4ef229e43465a95e!8m2!3d0.7243733!4d124.3199316"
+                >Alamat: Kotamobagu, Sulawesi Utara</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="row text-light text-center fw-bold py-2 border-top border-1">
+          <p style="font-size: 0.8em">
+            Internal Use Only | Copyright &#169; 2022 Fachri Gobel
+          </p>
+        </div>
+      </footer>
+    </div>
+    <script>
+      let csvFile = document.getElementById("csvFile");
+      const btnSubmit = document.querySelector("#btn-submit");
+
+      btnSubmit.addEventListener("click", function (e) {
+        if(csvFile.files.length) {
+        let fileList = csvFile.files[0];
+        const reader = new FileReader();  
+
+        const keywords = {
+          "tito": ["lalow","padang","mongkoinit", "maku", "dulangon", "armed", "pinogaluman", "pindol", "totabuan"],
+          "ismail": ["motabang", "labuan", "tombolango"],
+          "rico": ["baturapa", "sauk", "bumbung", "buntalo", "cempaka", "ayong", "babo", "bolangat", "lolanan", "pasir putih", "batu merah", "domisil", "pangi"],
+          "masrul": ["solog", "diat", "conch", "langagon", "tandu", "bango", "solimandungan", "komangaan"],
+          "andika": ["kaya", "inobonto"],
+          "wiranto": ["ambang", "bantik", "tadoy", "mariri", "monapan", "wineru", "gogaluman"]
+        };
+        let result = [];
+        
+        reader.onload = (e) => {
+          let data = JSON.parse(e.target.result);
+          
+          for (const rute in keywords) {
+            if (Object.hasOwnProperty.call(keywords, rute)) {
+              const element = keywords[rute];
+              
+              console.log("BATAS")
+              let csvContent = "data:text/csv;charset=utf-8,"
+
+              element.forEach(e => {
+                let pattern = new RegExp(e,"i");
+                result.push(data.filter((d) => {
+                  return d['cust_address1'].match(pattern);
+                }));
+              });
+              result.forEach((col) => {
+                if(col.length != 0) {
+                  col.forEach((row) => {
+                    csvContent += `${row['tracking_id']},\r\n`;
+                    console.log(csvContent);
+                  })
+                }
+              });
+
+              let encodedUri = encodeURI(csvContent);
+              let link = document.createElement("a");
+              link.setAttribute("href", encodedUri);
+              link.setAttribute("download", `${rute}.csv`);
+              document.body.appendChild(link); // Required for FF
+              link.click();
+              result = [];
+            }
+          }
+        }
+        reader.readAsText(fileList)
+        } else {
+              alert("Anda belum menginput file!")
+        }
+      });
+    </script>
+  </body>
+</html>
